@@ -1,0 +1,15 @@
+setup:
+  addons:
+    - plan: 'heroku-postgresql:hobby-dev'
+      as: DATABASE
+  config: {}
+build:
+  packages:
+    - 'gdal-bin'
+  languages:
+    - python
+run:
+  web: gunicorn system.wsgi --preload --log-file -
+release:
+  image: web
+  command: [python3 manage.py migrate,]

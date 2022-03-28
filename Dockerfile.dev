@@ -1,0 +1,31 @@
+FROM python:3.8.7-slim-buster
+
+WORKDIR /app
+
+LABEL maintainer="api.imperfect@gmail.com"
+LABEL description="Development image for the Hospitals GeoDjango API"
+
+ENV PYTHONDONTWRITEBYTECODE 1
+
+ENV PYTHONUNBUFFERED 1
+
+RUN apt-get update \
+    && apt-get -y install netcat gcc postgresql \
+    && apt-get clean
+RUN apt-get install -y python-psycopg2 libpq-dev 
+RUN apt-get update \
+    && apt-get install -y   gdal-bin python-gdal python3-gdal 
+       
+RUN pip3 install --upgrade setuptools
+RUN pip install --upgrade pip
+
+RUN  apt-get update \
+     && apt-get install -y redis-server 
+   
+
+
+COPY ./requirements.txt /app/requirements.txt
+
+RUN pip install -r requirements.txt
+
+COPY . /app
