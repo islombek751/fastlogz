@@ -1,4 +1,4 @@
-version: "3.9"
+version: "3.3"
 
 services:
    api:
@@ -8,8 +8,6 @@ services:
       command: python3 manage.py runserver 0.0.0.0:8000
       volumes:
          - .:/app
-      ports:
-         - 8000:8000
       env_file:
          - .env
       restart: "on-failure"
@@ -19,37 +17,31 @@ services:
          - hospital-api
 
    postgres-db:
-      image: kartoza/postgis:12.0
-      ports:
-         - 5432:5432
+      image: postgis/postgis:10-2.5-alpine
       volumes:
          - postgres_data:/var/lib/postgresql
       environment:
          - POSTGRES_USER=${POSTGRES_USER}
-         - POSTGRES_PASS=${POSTGRES_PASS}
+         - POSTGRES_PASSWORD=${POSTGRES_PASS}
          - POSTGRES_DBNAME=${POSTGRES_DBNAME}
       restart: "on-failure"
       networks:
          - hospital-api
+
    redis:
       container_name: "redis"
       image: "redis:alpine"
-      command: redis-server /usr/local/etc/redis/redis.conf --requirepass  admin123456
-      ports:
-         - 6379:6379
-      volumes:
-         - .redis.conf:/usr/local/etc/redis/redis.conf
-
+      command: redis-server --requirepass  admin123456
 
    nginx:
       restart: always
+      image: nginx:alpine
       depends_on:
          - api
-      build:
-         context: ./nginx
-         dockerfile: Dockerfile.dev
+      volumes:
+         - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
       ports:
-         - 8080:80
+         - 80:80
       networks:
          - hospital-api
    
